@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "name": "Drink Water",
+    "description": "2L per day",
+    "frequency": "daily",
+    "completed": true
+  },
+  {
+    "id": "2",
+    "name": "Workout",
+    "description": "30 mins workout",
+    "frequency": "weekly",
+    "completed": false
+  }
+]

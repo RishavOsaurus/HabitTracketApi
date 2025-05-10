@@ -1,0 +1,32 @@
+{
+  "name": "habittracketapi",
+  "version": "1.0.0",
+  "description": "this is a simple habit tracker api",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --env-file=.env server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RishavOsaurus/HabitTracketApi.git"
+  },
+  "keywords": [
+    "habit",
+    "api",
+    "track"
+  ],
+  "author": "rishav chapagain",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RishavOsaurus/HabitTracketApi/issues"
+  },
+  "homepage": "https://github.com/RishavOsaurus/HabitTracketApi#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "type": "module",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
