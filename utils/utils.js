@@ -1,5 +1,5 @@
 import { validationResult } from 'express-validator';
-
+import fs from 'fs/promises';
 
 export const expVal=  (req,res,next)=>{
         const errors = validationResult(req)
@@ -28,3 +28,4 @@ export const writeJsonFile = async (filePath, data) => {
 export const sendError = (res, err, statusCode = 500) => {
   res.status(statusCode).send({ error: [{ msg: err.message }] });
 };
+

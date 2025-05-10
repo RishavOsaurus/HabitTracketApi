@@ -7,17 +7,10 @@
     "completed": true
   },
   {
-    "id": "2",
+    "id": "3",
     "name": "Workout",
     "description": "30 mins workout",
     "frequency": "weekly",
     "completed": false
-  },
-  {
-    "id": 3,
-    "name": "Hola",
-    "description": "2L per day",
-    "frequency": "weekly",
-    "completed": true
   }
 ]

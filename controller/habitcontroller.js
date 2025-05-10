@@ -1,5 +1,5 @@
 import path from "path";
-import { readJsonFile, writeJsonFile , sendError} from "../utils/utils.js";
+import { readJsonFile, writeJsonFile, sendError } from "../utils/utils.js";
 const dataPath = path.resolve("data", "habits.json");
 
 export const getHabits = async (req, res) => {
@@ -30,7 +30,8 @@ export const createHabits = async (req, res) => {
     const habits = await readJsonFile(dataPath);
     const { name, description, frequency, completed } = req.body;
 
-    const newId = habits.length > 0 ? parseInt(habits[habits.length - 1].id) + 1 : 1;
+    const newId =
+      habits.length > 0 ? parseInt(habits[habits.length - 1].id) + 1 : 1;
     const newHabit = { id: newId, name, description, frequency, completed };
 
     habits.push(newHabit);
@@ -59,7 +60,7 @@ export const editHabits = async (req, res) => {
         name: name ?? habits[habitIndex].name,
         description: description ?? habits[habitIndex].description,
         frequency: frequency ?? habits[habitIndex].frequency,
-        completed: completed ?? habits[habitIndex].completed,
+        completed: completed ?? habits[habitIndex].completed
       };
     } else if (req.method === "PUT") {
       habits[habitIndex] = {
@@ -67,12 +68,32 @@ export const editHabits = async (req, res) => {
         name,
         description,
         frequency,
-        completed,
+        completed
       };
     }
 
     await writeJsonFile(dataPath, habits);
     res.status(200).json({ msg: "Successful", habit: habits[habitIndex] });
+  } catch (err) {
+    sendError(res, err);
+  }
+};
+
+export const delHabits = async (req, res) => {
+  try {
+    console.log("1")
+    const habits = await readJsonFile(dataPath);
+    const { id } = req.params;
+
+    const habitIndex = habits.findIndex((h) => h.id == parseInt(id));
+
+    if (habitIndex === -1) {
+      return sendError(res, new Error("Habit not found"), 404);
+    }
+
+    habits.splice(habitIndex, 1);
+    await writeJsonFile(dataPath, habits);
+    res.status(200).json({ msg: "Habit deleted successfully"});
   } catch (err) {
     sendError(res, err);
   }

@@ -1,5 +1,5 @@
 import express from 'express'
-import { getHabits, createHabits,editHabits} from '../controller/habitcontroller.js'
+import { getHabits, createHabits,editHabits,delHabits} from '../controller/habitcontroller.js'
 import { query, body,param} from 'express-validator'
 const router = express.Router()
 import { expVal } from '../utils/utils.js'
@@ -88,4 +88,7 @@ router.put("/habits/:id",
         .isBoolean().withMessage('Completed must be true or false')
         .isBoolean().withMessage('Completed must be true or false')
    , expVal,editHabits)
+
+router.delete("/habits/:id",delHabits)
+
 export default router
