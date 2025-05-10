@@ -1,19 +1,12 @@
 import path from "path";
-import fs from "fs/promises";
+import { readJsonFile, writeJsonFile , sendError} from "../utils/utils.js";
 const dataPath = path.resolve("data", "habits.json");
-console.log(dataPath);
+
 export const getHabits = async (req, res) => {
   try {
-    let fileData = "[]";
-    try {
-      fileData = await fs.readFile(dataPath, "utf-8");
-      if (fileData.trim() === "") fileData = "[]";
-    } catch (err) {
-      return res.status(500).send({ error: [{ msg: err.message }] });
-    }
-    const habits = JSON.parse(fileData);
-
+    const habits = await readJsonFile(dataPath);
     const { completed, frequency } = req.query;
+
     let filtered = habits;
 
     if (completed !== undefined) {
@@ -28,85 +21,59 @@ export const getHabits = async (req, res) => {
 
     res.status(200).json(filtered);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: [{ msg: err.message }] });
+    sendError(res, err);
   }
 };
 
 export const createHabits = async (req, res) => {
   try {
-    let fileData = "[]";
-    try {
-      fileData = await fs.readFile(dataPath, "utf-8");
-      if (fileData.trim() === "") fileData = "[]";
-    } catch (err) {
-      return res.status(500).send({ error: [{ msg: err.message }] });
-    }
-    let habits = JSON.parse(fileData);
+    const habits = await readJsonFile(dataPath);
     const { name, description, frequency, completed } = req.body;
-    const newId =
-      habits.length > 0 ? parseInt(habits[habits.length - 1].id) + 1 : 1;
-    console.log(newId);
-    const newHabit = {
-      id: newId,
-      name,
-      description,
-      frequency,
-      completed
-    };
+
+    const newId = habits.length > 0 ? parseInt(habits[habits.length - 1].id) + 1 : 1;
+    const newHabit = { id: newId, name, description, frequency, completed };
+
     habits.push(newHabit);
-    await fs.writeFile(dataPath, JSON.stringify(habits, null, 2));
+    await writeJsonFile(dataPath, habits);
+
     res.status(201).send({ habit: newHabit, msg: "Created Successfully" });
   } catch (err) {
-    res.status(500).send({ error: [{ msg: err.message }] });
+    sendError(res, err);
   }
 };
 
 export const editHabits = async (req, res) => {
-  try{
-  let fileData = "[]";
   try {
-    fileData = await fs.readFile(dataPath, "utf-8");
-    if (fileData.trim() === "") fileData = "[]";
+    const habits = await readJsonFile(dataPath);
+    const { name, description, frequency, completed } = req.body;
+    const { id } = req.params;
+
+    const habitIndex = habits.findIndex((h) => h.id == parseInt(id));
+    if (habitIndex === -1) {
+      return sendError(res, new Error("Habit not found"), 404);
+    }
+
+    if (req.method === "PATCH") {
+      habits[habitIndex] = {
+        ...habits[habitIndex],
+        name: name ?? habits[habitIndex].name,
+        description: description ?? habits[habitIndex].description,
+        frequency: frequency ?? habits[habitIndex].frequency,
+        completed: completed ?? habits[habitIndex].completed,
+      };
+    } else if (req.method === "PUT") {
+      habits[habitIndex] = {
+        id: habits[habitIndex].id,
+        name,
+        description,
+        frequency,
+        completed,
+      };
+    }
+
+    await writeJsonFile(dataPath, habits);
+    res.status(200).json({ msg: "Successful", habit: habits[habitIndex] });
   } catch (err) {
-    return res.status(500).send({ error: [{ msg: err.message }] });
+    sendError(res, err);
   }
-  const habits = JSON.parse(fileData)
- const { name, description, frequency, completed } = req.body;
-  const { id } = req.params;
-  const habitIndex = habits.findIndex(h => h.id == parseInt(id))
-
-  if(habitIndex === -1){
-    return res.status(404).json({ error: [{ msg: 'Habit not found' }] });
-  }
-  if(req.method == "PATCH"){
-habits[habitIndex] = {
-  id: habits[habitIndex].id, 
-  name: name !== undefined ? name : habits[habitIndex].name,
-  description: description !== undefined ? description : habits[habitIndex].description,
-  frequency: frequency !== undefined ? frequency : habits[habitIndex].frequency,
-  completed: completed !== undefined ? completed : habits[habitIndex].completed,
-};
-
-  }
-
-  if (req.method == "PUT"){
-      habits[habitIndex]= {
-    id: habits[habitIndex].id    ,
-    name ,
-    description,
-    frequency, 
-    completed 
-  }
-  }
-  await fs.writeFile(dataPath,JSON.stringify(habits,null,2))
-
-  res.status(200).json({
-    msg: "Successful",
-    habit: habits[habitIndex]
-  })
-
-}catch(err){
-  res.status(500).send({ error: [{ msg: err.message }] });
-}
 };
