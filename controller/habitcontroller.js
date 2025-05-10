@@ -79,15 +79,26 @@ export const editHabits = async (req, res) => {
   if(habitIndex === -1){
     return res.status(404).json({ error: [{ msg: 'Habit not found' }] });
   }
+  if(req.method == "PATCH"){
+habits[habitIndex] = {
+  id: habits[habitIndex].id, 
+  name: name !== undefined ? name : habits[habitIndex].name,
+  description: description !== undefined ? description : habits[habitIndex].description,
+  frequency: frequency !== undefined ? frequency : habits[habitIndex].frequency,
+  completed: completed !== undefined ? completed : habits[habitIndex].completed,
+};
 
-  habits[habitIndex]= {
-    ...habits[habitIndex],
-      name: name || habits[habitIndex].name,
-      description: description || habits[habitIndex].description,
-      frequency: frequency || habits[habitIndex].frequency,
-      completed: completed !== undefined ? completed : habits[habitIndex].completed
   }
 
+  if (req.method == "PUT"){
+      habits[habitIndex]= {
+    id: habits[habitIndex].id    ,
+    name ,
+    description,
+    frequency, 
+    completed 
+  }
+  }
   await fs.writeFile(dataPath,JSON.stringify(habits,null,2))
 
   res.status(200).json({
