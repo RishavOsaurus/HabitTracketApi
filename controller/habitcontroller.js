@@ -1,57 +1,101 @@
-import path from 'path'
-import fs from 'fs/promises'
-const dataPath = path.resolve('data', 'habits.json')
-console.log(dataPath)
+import path from "path";
+import fs from "fs/promises";
+const dataPath = path.resolve("data", "habits.json");
+console.log(dataPath);
 export const getHabits = async (req, res) => {
   try {
-    const fileData = await fs.readFile(dataPath, 'utf-8')
-    const habits = JSON.parse(fileData)
+    let fileData = "[]";
+    try {
+      fileData = await fs.readFile(dataPath, "utf-8");
+      if (fileData.trim() === "") fileData = "[]";
+    } catch (err) {
+      return res.status(500).send({ error: [{ msg: err.message }] });
+    }
+    const habits = JSON.parse(fileData);
 
-    const { completed, frequency } = req.query
-    let filtered = habits
+    const { completed, frequency } = req.query;
+    let filtered = habits;
 
     if (completed !== undefined) {
-      filtered = filtered.filter(h => String(h.completed) === completed)
+      filtered = filtered.filter((h) => String(h.completed) === completed);
     }
 
     if (frequency !== undefined) {
-      filtered = filtered.filter(h => h.frequency.toLowerCase() === frequency.toLowerCase())
+      filtered = filtered.filter(
+        (h) => h.frequency.toLowerCase() === frequency.toLowerCase()
+      );
     }
 
-    res.status(200).json(filtered)
+    res.status(200).json(filtered);
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: [{msg: err.message}] })
+    console.error(err);
+    res.status(500).json({ error: [{ msg: err.message }] });
   }
-}
+};
 
-export const createHabits = async(req,res)=>{
-  try{
-  let fileData = '[]'
-  try{
-  fileData = await fs.readFile(dataPath,"utf-8")
-    if(fileData.trim()=== '')
-      fileData= '[]'
-}
-catch(err){
-    return res.status(500).send({error: [{msg: err.message}]})
-}
-let habits = JSON.parse(fileData)
-const {name,description,frequency,completed} = req.body
-const newId=habits.length>0 ? parseInt(habits[habits.length - 1].id)+1 : 1
-console.log(newId)
-const newHabit = {
-    id:   newId,
-    name,
-    description,
-    frequency,
-    completed
-}
-habits.push(newHabit)
-await fs.writeFile(dataPath,JSON.stringify(habits,null,2))
-res.status(201).send({habit: newHabit,msg: "Created Successfully"})
+export const createHabits = async (req, res) => {
+  try {
+    let fileData = "[]";
+    try {
+      fileData = await fs.readFile(dataPath, "utf-8");
+      if (fileData.trim() === "") fileData = "[]";
+    } catch (err) {
+      return res.status(500).send({ error: [{ msg: err.message }] });
+    }
+    let habits = JSON.parse(fileData);
+    const { name, description, frequency, completed } = req.body;
+    const newId =
+      habits.length > 0 ? parseInt(habits[habits.length - 1].id) + 1 : 1;
+    console.log(newId);
+    const newHabit = {
+      id: newId,
+      name,
+      description,
+      frequency,
+      completed
+    };
+    habits.push(newHabit);
+    await fs.writeFile(dataPath, JSON.stringify(habits, null, 2));
+    res.status(201).send({ habit: newHabit, msg: "Created Successfully" });
+  } catch (err) {
+    res.status(500).send({ error: [{ msg: err.message }] });
   }
-  catch(err){
-    res.status(500).send({error: [{msg: err.message}]})
+};
+
+export const editHabits = async (req, res) => {
+  try{
+  let fileData = "[]";
+  try {
+    fileData = await fs.readFile(dataPath, "utf-8");
+    if (fileData.trim() === "") fileData = "[]";
+  } catch (err) {
+    return res.status(500).send({ error: [{ msg: err.message }] });
   }
+  const habits = JSON.parse(fileData)
+ const { name, description, frequency, completed } = req.body;
+  const { id } = req.params;
+  const habitIndex = habits.findIndex(h => h.id == parseInt(id))
+
+  if(habitIndex === -1){
+    return res.status(404).json({ error: [{ msg: 'Habit not found' }] });
+  }
+
+  habits[habitIndex]= {
+    ...habits[habitIndex],
+      name: name || habits[habitIndex].name,
+      description: description || habits[habitIndex].description,
+      frequency: frequency || habits[habitIndex].frequency,
+      completed: completed !== undefined ? completed : habits[habitIndex].completed
+  }
+
+  await fs.writeFile(dataPath,JSON.stringify(habits,null,2))
+
+  res.status(200).json({
+    msg: "Successful",
+    habit: habits[habitIndex]
+  })
+
+}catch(err){
+  res.status(500).send({ error: [{ msg: err.message }] });
 }
+};

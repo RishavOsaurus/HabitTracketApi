@@ -12,5 +12,12 @@
     "description": "30 mins workout",
     "frequency": "weekly",
     "completed": false
+  },
+  {
+    "id": 3,
+    "name": "Drink ater",
+    "description": "2L per day",
+    "frequency": "daily",
+    "completed": true
   }
 ]
