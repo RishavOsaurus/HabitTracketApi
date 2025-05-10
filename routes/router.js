@@ -89,6 +89,12 @@ router.put("/habits/:id",
         .isBoolean().withMessage('Completed must be true or false')
    , expVal,editHabits)
 
-router.delete("/habits/:id",delHabits)
+router.delete("/habits/:id", [
+    param('id')
+        .exists()
+        .withMessage("ID is required")
+        .isInt({ min: 1 })
+        .withMessage("ID must be a valid integer")
+], expVal, delHabits)
 
 export default router
